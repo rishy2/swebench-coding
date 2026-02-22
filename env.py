@@ -225,22 +225,31 @@ def setup_swebench_task(
     # Ensure pytest is available in the conda env (needed for test execution)
     _run(f"conda run -n {conda_env} pip install pytest", cwd=project_dir)
 
-    # Run install command first, then pin packages to correct versions
-    logger.info(f"Installing: {install_cmd}")
-    _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
-
-    # Install pinned pip packages AFTER install (overrides with correct versions)
+    # Install pinned pip packages BEFORE install (provides build deps like numpy
+    # for repos that use --no-build-isolation like scikit-learn)
     if pip_packages:
         pip_list = " ".join(f'"{p}"' for p in pip_packages)
         logger.info(f"Pinning {len(pip_packages)} pip packages")
         _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
 
-    # 3. Checkout base_commit
+    # Run install command, then re-pin packages to correct versions
+    logger.info(f"Installing: {install_cmd}")
+    _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+
+    if pip_packages:
+        pip_list = " ".join(f'"{p}"' for p in pip_packages)
+        logger.info(f"Re-pinning {len(pip_packages)} pip packages")
+        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
+
+    # 3. Checkout base_commit (force to handle dirty files from pre_install)
     logger.info(f"Checking out base_commit: {base_commit}")
-    _run(["git", "checkout", base_commit], cwd=project_dir)
+    _run(["git", "checkout", "-f", base_commit], cwd=project_dir)
 
     # Re-install at base_commit, then re-pin packages
     logger.info(f"Re-installing at base_commit")
+    # Re-run pre_install at base_commit (some commands modify build config)
+    for cmd in pre_install:
+        _run(cmd, cwd=project_dir)
     _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
     if pip_packages:
         pip_list = " ".join(f'"{p}"' for p in pip_packages)

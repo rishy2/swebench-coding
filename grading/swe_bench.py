@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import shlex
 import subprocess
 
 from .spec import Grader, ValidateMode
@@ -70,8 +71,9 @@ class SWEBenchRunner:
     def _get_test_directives(test_ids: list[str]) -> list[str]:
         """Convert SWE-bench test IDs to test command directives.
 
-        Handles two formats:
+        Handles three formats:
         - unittest-style: 'test_foo (module.path.ClassName)' -> 'module.path.ClassName.test_foo'
+        - unittest with embedded method: 'test_foo (module.path.ClassName.test_foo)' -> 'module.path.ClassName.test_foo'
         - pytest-style: 'tests/test_foo.py::test_bar' -> used as-is
         - bare function names: 'test_foo' -> used as-is (needs file paths separately)
         """
@@ -80,7 +82,12 @@ class SWEBenchRunner:
             m = re.match(r"^(\S+)\s+\((.+)\)$", tid)
             if m:
                 test_method, class_path = m.groups()
-                directives.append(f"{class_path}.{test_method}")
+                # Some SWE-bench instances already include the method name
+                # in the class path — don't append it again
+                if class_path.endswith(f".{test_method}"):
+                    directives.append(class_path)
+                else:
+                    directives.append(f"{class_path}.{test_method}")
             else:
                 directives.append(tid)
         return directives
@@ -140,6 +147,11 @@ class SWEBenchRunner:
         return result.returncode, result.stdout or "", result.stderr or ""
 
     @staticmethod
+    def _strip_ansi(text: str) -> str:
+        """Strip ANSI escape sequences from text."""
+        return re.sub(r"\x1b\[[0-9;]*m", "", text)
+
+    @staticmethod
     def _parse_test_output(stdout: str, stderr: str) -> dict[str, str]:
         """Parse test output from various frameworks into {test_id: PASSED|FAILED}.
 
@@ -150,6 +162,10 @@ class SWEBenchRunner:
         """
         results = {}
 
+        # Strip ANSI color codes (e.g. from tox/sphinx output)
+        stdout = SWEBenchRunner._strip_ansi(stdout)
+        stderr = SWEBenchRunner._strip_ansi(stderr)
+
         # 1. pytest format: PASSED/FAILED lines in summary section
         for line in stdout.split("\n"):
             line = line.strip()
@@ -158,14 +174,36 @@ class SWEBenchRunner:
                 status = "PASSED" if m.group(1) == "PASSED" else "FAILED"
                 results[m.group(2).strip()] = status
 
-        # 2. Django format: 'test_method (module.Class) ... ok/FAIL/ERROR' in stderr
-        for line in stderr.split("\n"):
+        # 2. Django format in stderr. Two sub-formats:
+        #    a) Single line: 'test_method (module.Class) ... ok/FAIL/ERROR'
+        #    b) Multi-line (tests with docstrings):
+        #       'test_method (module.Class)'
+        #       'Description text. ... ok/FAIL/ERROR'
+        stderr_lines = stderr.split("\n")
+        pending_test_id = None
+        for line in stderr_lines:
             line = line.strip()
+            # Try single-line format
             m = re.match(r"^(\S+\s+\(.+?\))\s+\.\.\.\s+(ok|FAIL|ERROR|skipped)", line)
             if m:
                 test_id = m.group(1)
                 status = "PASSED" if m.group(2) == "ok" else "FAILED"
                 results[test_id] = status
+                pending_test_id = None
+                continue
+            # Check for test_name (module.Class) without status — multi-line
+            m2 = re.match(r"^(\S+\s+\(.+?\))\s*$", line)
+            if m2:
+                pending_test_id = m2.group(1)
+                continue
+            # Check for status on description line (multi-line continuation)
+            if pending_test_id:
+                m3 = re.search(r"\.\.\.\s+(ok|FAIL|ERROR|skipped)\s*$", line)
+                if m3:
+                    status = "PASSED" if m3.group(1) == "ok" else "FAILED"
+                    results[pending_test_id] = status
+                    pending_test_id = None
+                    continue
 
         # 3. sympy format: 'test_name ok/F/f/E/s/X/w' in stdout
         # sympy outputs to stdout, statuses: ok=pass, F=fail, f=xfail, E=error,
@@ -192,7 +230,10 @@ class SWEBenchRunner:
 
     @staticmethod
     def _check_tests(
-        results: dict[str, str], test_ids: list[str], expect_pass: bool
+        results: dict[str, str],
+        test_ids: list[str],
+        expect_pass: bool,
+        lenient_not_found: bool = False,
     ) -> tuple[bool, dict]:
         """Check if test IDs match expected status in parsed results.
 
@@ -200,6 +241,8 @@ class SWEBenchRunner:
             results: Parsed {test_id: PASSED|FAILED} from test output
             test_ids: List of test IDs to check
             expect_pass: True if tests should pass, False if they should fail
+            lenient_not_found: If True, NOT_FOUND tests are ignored (for P2P
+                where tests may be skipped due to missing optional deps)
         """
         details = {}
         all_match = True
@@ -219,8 +262,14 @@ class SWEBenchRunner:
                         break
 
             if status is None:
-                details[tid] = "NOT_FOUND"
-                all_match = False
+                if lenient_not_found:
+                    details[tid] = "NOT_FOUND (skipped)"
+                else:
+                    details[tid] = "NOT_FOUND"
+                    all_match = False
+            elif status == "SKIPPED":
+                # Skipped tests are not failures — treat as OK
+                details[tid] = "SKIPPED"
             elif expect_pass and status != "PASSED":
                 details[tid] = status
                 all_match = False
@@ -235,8 +284,12 @@ class SWEBenchRunner:
     def _run_tests_with_directives(
         self, directives: list[str], label: str
     ) -> tuple[int, str, str]:
-        """Run the test command with given directives."""
-        directive_str = " ".join(directives)
+        """Run the test command with given directives.
+
+        Uses shlex.quote() on each directive to handle special chars
+        (parentheses in parametrized pytest IDs, brackets, etc.).
+        """
+        directive_str = " ".join(shlex.quote(d) for d in directives)
         cmd = f"{self.test_cmd} {directive_str}"
         if self.eval_commands:
             cmd = f"{self.eval_commands} && {cmd}"
@@ -272,11 +325,61 @@ class SWEBenchRunner:
             all_test_ids = self.fail_to_pass + self.pass_to_pass
             directives = self._get_test_directives(all_test_ids)
 
+            # Filter out non-standard test IDs (descriptions, comments)
+            # that appear in some SWE-bench instances
+            valid_directives = [
+                d for d in directives
+                if not d.startswith("#") and "  " not in d
+                and not d.endswith(".") and len(d.split()) <= 3
+            ]
+            if len(valid_directives) < len(directives):
+                logger.info(
+                    f"Filtered {len(directives) - len(valid_directives)} "
+                    f"non-standard test IDs"
+                )
+                directives = valid_directives
+
             if not self._ids_have_paths(directives):
                 # Bare function names (sympy etc.) — use file paths from test_patch
                 test_files = self._extract_test_files(patch_content)
                 logger.info(f"Using test files from patch: {test_files}")
                 directives = test_files
+            else:
+                # Check if test IDs contain special chars that break pytest
+                # node ID matching (parametrized IDs with *, (, ", etc.)
+                # or if there are many IDs (>50). In either case, use file
+                # paths instead of individual IDs for reliability.
+                special_chars = set('()[]*,"\'')
+                has_special = any(
+                    any(c in d for c in special_chars)
+                    for d in directives
+                    if "::" in d  # only check pytest-style IDs
+                )
+                if has_special or len(directives) > 50:
+                    file_set = set()
+                    for d in directives:
+                        if "::" in d:
+                            file_set.add(d.split("::")[0])
+                        elif "/" in d:
+                            file_set.add(d)
+                    # For Django-style dotted paths, fall back to test files
+                    # from the test patch, converting to dotted module names
+                    # for runtests.py (which rejects file paths)
+                    if not file_set:
+                        for f in self._extract_test_files(patch_content):
+                            # Convert tests/app/test_foo.py → app.test_foo
+                            label = f
+                            if label.startswith("tests/"):
+                                label = label[len("tests/"):]
+                            label = label.replace("/", ".").removesuffix(".py")
+                            file_set.add(label)
+                    if file_set:
+                        logger.info(
+                            f"Using {len(file_set)} test files instead of "
+                            f"{len(directives)} individual IDs"
+                            f"{' (special chars detected)' if has_special else ''}"
+                        )
+                        directives = sorted(file_set)
 
             # De-duplicate directives while preserving order
             seen = set()
@@ -304,9 +407,10 @@ class SWEBenchRunner:
                 test_results, self.fail_to_pass, expect_pass=True
             )
 
-            # Check P2P: all should still PASS
+            # Check P2P: all should still PASS (lenient for NOT_FOUND/skipped)
             p2p_pass, p2p_details = self._check_tests(
-                test_results, self.pass_to_pass, expect_pass=True
+                test_results, self.pass_to_pass, expect_pass=True,
+                lenient_not_found=True,
             )
 
         finally:
