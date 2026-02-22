@@ -14,36 +14,31 @@ from grading import Grade, SWEBenchGrader, ValidateMode
 logger = logging.getLogger(__name__)
 
 
-def _register_task(instance: dict) -> None:
-    """Register a single SWE-bench instance as an @env.scenario."""
-    instance_id = instance["instance_id"]
-    # Scenario names use the instance_id directly (e.g., "django__django-11099")
-    scenario_name = instance_id
+def _make_scenario(instance: dict):
+    """Create a scenario function for a SWE-bench instance.
 
-    @env.scenario(scenario_name)
-    async def task(
-        hints_enabled: bool = False,
-        validate_mode: ValidateMode | None = None,
-        _instance: dict = instance,
-    ):
+    Uses a factory function to properly capture `instance` in a closure,
+    avoiding the Python closure-in-loop variable capture issue.
+    """
+    async def task(hints_enabled: bool = False, validate_mode: ValidateMode | None = None):
         setup_swebench_task(
-            instance_id=_instance["instance_id"],
-            repo=_instance["repo"],
-            base_commit=_instance["base_commit"],
-            test_patch=_instance["test_patch"],
-            gold_patch=_instance["patch"],
-            version=_instance["version"],
-            environment_setup_commit=_instance.get("environment_setup_commit", ""),
-            fail_to_pass=_instance["FAIL_TO_PASS"],
-            pass_to_pass=_instance["PASS_TO_PASS"],
+            instance_id=instance["instance_id"],
+            repo=instance["repo"],
+            base_commit=instance["base_commit"],
+            test_patch=instance["test_patch"],
+            gold_patch=instance["patch"],
+            version=instance["version"],
+            environment_setup_commit=instance.get("environment_setup_commit", ""),
+            fail_to_pass=instance["FAIL_TO_PASS"],
+            pass_to_pass=instance["PASS_TO_PASS"],
             validate_mode=validate_mode,
         )
 
-        hints_text = _instance.get("hints_text", "") if hints_enabled else ""
+        hints_text = instance.get("hints_text", "") if hints_enabled else ""
         prompt = make_swebench_prompt(
-            problem_statement=_instance["problem_statement"],
+            problem_statement=instance["problem_statement"],
             hints_text=hints_text,
-            repo=_instance["repo"],
+            repo=instance["repo"],
         )
 
         _ = yield prompt
@@ -56,7 +51,15 @@ def _register_task(instance: dict) -> None:
         ])
         yield grade.score
 
-    task.__doc__ = f"SWE-bench: {instance_id}"
+    task.__doc__ = f"SWE-bench: {instance['instance_id']}"
+    return task
+
+
+def _register_task(instance: dict) -> None:
+    """Register a single SWE-bench instance as an @env.scenario."""
+    scenario_name = instance["instance_id"]
+    task = _make_scenario(instance)
+    env.scenario(scenario_name)(task)
 
 
 def register_all() -> None:
