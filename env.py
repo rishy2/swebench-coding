@@ -1,4 +1,4 @@
-"""Coding environment - tools for solving programming tasks.
+"""Coding environment - tools for solving SWE-bench programming tasks.
 
 This environment provides tools for:
 - Running bash commands in a sandboxed shell
@@ -7,6 +7,7 @@ This environment provides tools for:
 Tools prefixed with _ are internal (hidden from agent, used by scenarios).
 """
 
+import json
 import logging
 import os
 import subprocess
@@ -133,96 +134,175 @@ async def editor(
 
 
 # ============================================================================
-# Scenario Helpers (called by @env.scenario functions in tasks/)
+# Scenario Helpers for SWE-bench
 # ============================================================================
 
+def _load_repo_specs() -> dict:
+    """Load repo specifications from data/repo_specs.json."""
+    specs_path = Path(__file__).parent / "data" / "repo_specs.json"
+    with open(specs_path) as f:
+        return json.load(f)
 
-def setup_task(task_id: str, base: str, test: str, golden: str, validate_mode: ValidateMode | None = None) -> None:
-    """Set up environment for a task: checkout baseline, generate patches.
-    
-    Args:
-        task_id: Unique identifier for the task (used for patch directory)
-        base: Baseline branch name
-        test: Test branch name (contains hidden tests)
-        golden: Golden branch name (contains solution)
+
+def _run(cmd: str | list[str], **kwargs) -> subprocess.CompletedProcess:
+    """Run a command and log output."""
+    if isinstance(cmd, str):
+        cmd_str = cmd
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, **kwargs)
+    else:
+        cmd_str = " ".join(cmd)
+        result = subprocess.run(cmd, capture_output=True, text=True, **kwargs)
+    if result.returncode != 0:
+        logger.warning(f"Command failed (exit {result.returncode}): {cmd_str}")
+        if result.stderr:
+            logger.warning(f"stderr: {result.stderr[:2000]}")
+    return result
+
+
+def setup_swebench_task(
+    instance_id: str,
+    repo: str,
+    base_commit: str,
+    test_patch: str,
+    gold_patch: str,
+    version: str,
+    environment_setup_commit: str,
+    fail_to_pass: list[str],
+    pass_to_pass: list[str],
+    validate_mode: ValidateMode | None = None,
+) -> None:
+    """Set up environment for a SWE-bench task.
+
+    1. Clone the repo
+    2. Checkout environment_setup_commit, install deps via conda
+    3. Checkout base_commit
+    4. Store patches
+    5. If golden_pass validation: apply gold patch
     """
     project_dir = _get_project_dir()
     patches_dir = os.environ.get("PATCHES_DIR", "/home/root/patches")
-    
-    # Set PROBLEM_ID env var for grading runner
-    os.environ["PROBLEM_ID"] = task_id
-    
-    # Generate patches at runtime
-    task_patches_dir = os.path.join(patches_dir, task_id)
+
+    # Set PROBLEM_ID env var for grading
+    os.environ["PROBLEM_ID"] = instance_id
+
+    # Load repo specs
+    repo_specs = _load_repo_specs()
+    repo_spec = repo_specs.get(repo, {})
+    version_spec = repo_spec.get("versions", {}).get(version, {})
+
+    python_version = version_spec.get("python", "3.9")
+    install_cmd = version_spec.get("install", "python -m pip install -e .")
+    test_cmd = version_spec.get("test_cmd", "pytest -rA")
+    pre_install = version_spec.get("pre_install", [])
+    pip_packages = version_spec.get("pip_packages", [])
+    eval_commands = version_spec.get("eval_commands", [])
+
+    # Determine conda env name
+    py_major_minor = python_version.replace(".", "")
+    conda_env = f"py{py_major_minor}"
+
+    logger.info(f"Setting up SWE-bench task: {instance_id}")
+    logger.info(f"  repo={repo}, version={version}, python={python_version}, conda_env={conda_env}")
+
+    # 1. Clone the repo
+    logger.info(f"Cloning {repo} to {project_dir}")
+    _run(["rm", "-rf", project_dir])
+    _run(["git", "clone", f"https://github.com/{repo}.git", project_dir])
+
+    # Mark as safe directory
+    _run(["git", "config", "--global", "--add", "safe.directory", project_dir])
+
+    # 2. Checkout environment_setup_commit and install deps
+    if environment_setup_commit:
+        logger.info(f"Checking out environment_setup_commit: {environment_setup_commit}")
+        _run(["git", "checkout", environment_setup_commit], cwd=project_dir)
+
+    # Run pre_install commands (as root, since they may need apt)
+    for cmd in pre_install:
+        logger.info(f"Pre-install: {cmd}")
+        _run(cmd, cwd=project_dir)
+
+    # Install pip packages into conda env
+    if pip_packages:
+        pip_list = " ".join(f'"{p}"' for p in pip_packages)
+        logger.info(f"Installing {len(pip_packages)} pip packages")
+        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
+
+    # Run install command
+    logger.info(f"Installing: {install_cmd}")
+    _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+
+    # 3. Checkout base_commit
+    logger.info(f"Checking out base_commit: {base_commit}")
+    _run(["git", "checkout", base_commit], cwd=project_dir)
+
+    # Re-install at base_commit (deps may differ)
+    logger.info(f"Re-installing at base_commit")
+    _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+
+    # 4. Store patches
+    task_patches_dir = os.path.join(patches_dir, instance_id)
     os.makedirs(task_patches_dir, exist_ok=True)
-    
-    # Generate test.patch (base → test)
-    logger.info("Generating test.patch: %s → %s", base, test)
-    result = subprocess.run(
-        ["git", "diff", f"origin/{base}", f"origin/{test}"],
-        cwd=project_dir,
-        capture_output=True,
-        text=True,
-    )
+
     with open(os.path.join(task_patches_dir, "test.patch"), "w") as f:
-        f.write(result.stdout)
-    
-    # Generate golden.patch (base → golden)
-    logger.info("Generating golden.patch: %s → %s", base, golden)
-    result = subprocess.run(
-        ["git", "diff", f"origin/{base}", f"origin/{golden}"],
-        cwd=project_dir,
-        capture_output=True,
-        text=True,
-    )
+        f.write(test_patch)
+
     with open(os.path.join(task_patches_dir, "golden.patch"), "w") as f:
-        f.write(result.stdout)
-    
-    # Checkout baseline branch
+        f.write(gold_patch)
+
+    # 5. If golden_pass validation: apply gold patch
     if validate_mode == "golden_pass":
-        logger.info("Checking out golden branch (validation): %s", golden)
-        checkout_branch = golden
-    else:
-        checkout_branch = base
-        logger.info("Checking out baseline branch: %s", checkout_branch)
+        logger.info("Applying golden patch for validation")
+        result = _run(
+            ["git", "apply", "--verbose"],
+            cwd=project_dir,
+            input=gold_patch,
+        )
+        if result.returncode != 0:
+            logger.error(f"Failed to apply golden patch: {result.stderr}")
 
-    result = subprocess.run(
-        ["git", "checkout", "-f", f"origin/{checkout_branch}"],
-        cwd=project_dir,
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        logger.error("Failed to checkout %s: %s", checkout_branch, result.stderr)
+    # Set ownership and protect .git
+    _run(["chown", "-R", "ubuntu:ubuntu", project_dir])
+    _run(["chown", "-R", "root:root", os.path.join(project_dir, ".git")])
+    _run(["chmod", "-R", "700", os.path.join(project_dir, ".git")])
+
+    # Set env vars for grading
+    os.environ["SWE_CONDA_ENV"] = conda_env
+    os.environ["SWE_TEST_CMD"] = test_cmd
+    if eval_commands:
+        os.environ["SWE_EVAL_COMMANDS"] = " && ".join(eval_commands)
     else:
-        logger.info("Checked out baseline branch: %s", checkout_branch)
-        # Restore file ownership to ubuntu
-        subprocess.run(["chown", "-R", "ubuntu:ubuntu", project_dir], capture_output=True)
-        # Keep .git protected
-        subprocess.run(["chown", "-R", "root:root", os.path.join(project_dir, ".git")], capture_output=True)
-    
+        os.environ.pop("SWE_EVAL_COMMANDS", None)
+
+    # Store test IDs for grading
+    os.environ["SWE_FAIL_TO_PASS"] = json.dumps(fail_to_pass)
+    os.environ["SWE_PASS_TO_PASS"] = json.dumps(pass_to_pass)
+
     os.chdir(project_dir)
+    logger.info(f"Setup complete for {instance_id}")
 
 
+def make_swebench_prompt(problem_statement: str, hints_text: str = "", repo: str = "") -> str:
+    """Generate a prompt for a SWE-bench task."""
+    prompt = f"""You are working on a bug fix in a Python repository.
+The repository has been cloned to /home/ubuntu/project.
 
+Here is the issue description:
 
-def make_prompt(description: str) -> str:
-    """Generate a prompt from a task description.
-    
-    Args:
-        description: The task description
-        
-    Returns:
-        Formatted prompt string
-    """
-    folder_name = os.environ.get('FOLDER_NAME', 'project')
-    return f"""You will be working on a task for {folder_name}.
-The repository has already been cloned in /home/ubuntu/{folder_name}.
-
-Use the tools provided to complete the following task:
-
-{description}
+{problem_statement}
 """
+    if hints_text:
+        prompt += f"""
+Here are some hints that may help:
+
+{hints_text}
+"""
+
+    prompt += """
+You MUST edit the relevant file(s) to fix the bug. Do not just describe the fix.
+Use the bash and editor tools to explore the codebase and make your changes.
+"""
+    return prompt
 
 
 # ============================================================================

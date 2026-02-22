@@ -20,7 +20,7 @@ target-version = "py311"
 line-length = 120
 
 [tool.hud]
-image = "coding-template:dev"
+image = "swebench-coding:dev"
 
 [tool.ruff.lint]
 select = [ "E", "F", "B", "I", "C4", "UP",]
