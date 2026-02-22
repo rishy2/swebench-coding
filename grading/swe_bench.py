@@ -1,14 +1,15 @@
 """SWE-bench grading: runner and grader for SWE-bench tasks.
 
-The runner applies the test patch and runs FAIL_TO_PASS / PASS_TO_PASS tests.
+The runner applies the test patch, runs ALL tests from the test files,
+then parses output to check FAIL_TO_PASS / PASS_TO_PASS individually.
 The grader wraps the runner and handles validation modes.
 """
 
 import json
 import logging
 import os
+import re
 import subprocess
-import uuid
 
 from .spec import Grader, ValidateMode
 
@@ -16,7 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 class SWEBenchRunner:
-    """Runs SWE-bench tests: applies test_patch, runs F2P and P2P test suites."""
+    """Runs SWE-bench tests: applies test_patch, runs tests, parses results.
+
+    Applies the test patch in-place (not copying to temp dir) to avoid
+    issues with editable installs (pip install -e .) that create symlinks
+    pointing to the original directory.
+
+    Runs ALL tests from the test patch files once, then parses the output
+    to determine per-test pass/fail status. This handles repos where test
+    IDs are bare function names (sympy) or from the same file (Django).
+    """
 
     def __init__(
         self,
@@ -39,48 +49,87 @@ class SWEBenchRunner:
         self.patches_dir = patches_dir
         self.repo_path = repo_path or f"/home/ubuntu/{os.environ.get('FOLDER_NAME', 'project')}"
         self.timeout = timeout
-        self.working_dir = f"/tmp/grading_{uuid.uuid4()}"
 
     @property
     def test_patch_path(self) -> str:
         return os.path.join(self.patches_dir, self.instance_id, "test.patch")
 
-    def _run_test_suite(self, test_ids: list[str], label: str) -> tuple[bool, dict]:
-        """Run a set of tests and return (success, metadata)."""
-        if not test_ids:
-            return True, {"skipped": True, "label": label}
+    @staticmethod
+    def _extract_test_files(patch_content: str) -> list[str]:
+        """Extract test file paths from a unified diff patch."""
+        files = set()
+        for line in patch_content.split("\n"):
+            if line.startswith("diff --git"):
+                # diff --git a/path/to/file b/path/to/file
+                parts = line.split(" b/", 1)
+                if len(parts) == 2:
+                    files.add(parts[1].strip())
+        return sorted(files)
 
-        # Build test command with specific test IDs
-        test_id_str = " ".join(test_ids)
-        cmd = f"{self.test_cmd} {test_id_str}"
+    @staticmethod
+    def _get_test_directives(test_ids: list[str]) -> list[str]:
+        """Convert SWE-bench test IDs to test command directives.
 
-        # Prepend eval_commands if present
-        if self.eval_commands:
-            cmd = f"{self.eval_commands} && {cmd}"
+        Handles two formats:
+        - unittest-style: 'test_foo (module.path.ClassName)' -> 'module.path.ClassName.test_foo'
+        - pytest-style: 'tests/test_foo.py::test_bar' -> used as-is
+        - bare function names: 'test_foo' -> used as-is (needs file paths separately)
+        """
+        directives = []
+        for tid in test_ids:
+            m = re.match(r"^(\S+)\s+\((.+)\)$", tid)
+            if m:
+                test_method, class_path = m.groups()
+                directives.append(f"{class_path}.{test_method}")
+            else:
+                directives.append(tid)
+        return directives
 
-        # Write to a temp script to avoid shell quoting issues with test IDs
-        # (test IDs often contain brackets, colons, etc.)
-        script_path = os.path.join(self.working_dir, f"_run_{label}.sh")
+    @staticmethod
+    def _ids_have_paths(test_ids: list[str]) -> bool:
+        """Check if test IDs include file paths (pytest/Django style).
+
+        Returns False for bare function names (sympy style like 'test_foo').
+        """
+        for tid in test_ids:
+            # pytest: contains / or ::
+            if "/" in tid or "::" in tid:
+                return True
+            # Django unittest: contains parentheses
+            if "(" in tid:
+                return True
+            # Dotted module path (Django-converted): has multiple dots
+            if tid.count(".") >= 2:
+                return True
+        return False
+
+    def _run_cmd(self, cmd: str, label: str) -> tuple[int, str, str]:
+        """Run a command via conda in a clean environment."""
+        script_path = os.path.join(self.repo_path, f"_run_{label}.sh")
         with open(script_path, "w") as f:
             f.write("#!/bin/bash\nset -e\n")
-            f.write(f"cd {self.working_dir}\n")
+            f.write("unset PYTHONPATH\n")
+            f.write(f"cd {self.repo_path}\n")
             f.write(f"{cmd}\n")
         os.chmod(script_path, 0o755)
 
-        full_cmd = f"conda run -n {self.conda_env} bash {script_path}"
-        logger.info(f"Running {label} ({len(test_ids)} tests): {cmd[:500]}")
+        full_cmd = f"conda run --no-capture-output -n {self.conda_env} bash {script_path}"
+        logger.info(f"Running {label}: {cmd[:500]}")
+
+        env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
 
         try:
             result = subprocess.run(
                 ["bash", "-lc", full_cmd],
-                cwd=self.working_dir,
+                cwd=self.repo_path,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
+                env=env,
             )
         except subprocess.TimeoutExpired:
             logger.warning(f"{label} timed out after {self.timeout}s")
-            return False, {"timeout": True, "label": label}
+            return -1, "", "TIMEOUT"
 
         logger.info(f"{label} exit code: {result.returncode}")
         if result.stdout:
@@ -88,25 +137,118 @@ class SWEBenchRunner:
         if result.stderr:
             logger.info(f"{label} stderr (last 2000):\n{result.stderr[-2000:]}")
 
-        return result.returncode == 0, {
-            "label": label,
-            "exit_code": result.returncode,
-            "stdout": result.stdout[-3000:] if result.stdout else "",
-            "stderr": result.stderr[-2000:] if result.stderr else "",
-        }
+        return result.returncode, result.stdout or "", result.stderr or ""
+
+    @staticmethod
+    def _parse_test_output(stdout: str, stderr: str) -> dict[str, str]:
+        """Parse test output from various frameworks into {test_id: PASSED|FAILED}.
+
+        Supports:
+        - pytest: 'PASSED tests/test_foo.py::test_bar' in summary
+        - Django: 'test_name (module.Class) ... ok' in stderr
+        - sympy: 'test_name ok' in stderr
+        """
+        results = {}
+
+        # 1. pytest format: PASSED/FAILED lines in summary section
+        for line in stdout.split("\n"):
+            line = line.strip()
+            m = re.match(r"^(PASSED|FAILED|ERROR)\s+(.+?)(\s+-\s+.*)?$", line)
+            if m:
+                status = "PASSED" if m.group(1) == "PASSED" else "FAILED"
+                results[m.group(2).strip()] = status
+
+        # 2. Django format: 'test_method (module.Class) ... ok/FAIL/ERROR' in stderr
+        for line in stderr.split("\n"):
+            line = line.strip()
+            m = re.match(r"^(\S+\s+\(.+?\))\s+\.\.\.\s+(ok|FAIL|ERROR|skipped)", line)
+            if m:
+                test_id = m.group(1)
+                status = "PASSED" if m.group(2) == "ok" else "FAILED"
+                results[test_id] = status
+
+        # 3. sympy format: 'test_name ok/F/f/E/s/X/w' in stdout
+        # sympy outputs to stdout, statuses: ok=pass, F=fail, f=xfail, E=error,
+        # s=skip, X=xpass, w=slow. Only use if no other results found.
+        if not results:
+            for line in stdout.split("\n"):
+                line = line.strip()
+                m = re.match(
+                    r"^(test_\w+)\s+(ok|F|f|E|s|X|w|FAIL|ERROR|skip|XFAIL)\s*$",
+                    line,
+                )
+                if m:
+                    test_name = m.group(1)
+                    raw_status = m.group(2)
+                    if raw_status in ("ok", "f", "X", "w", "XFAIL"):
+                        status = "PASSED"
+                    elif raw_status in ("s", "skip"):
+                        status = "SKIPPED"
+                    else:
+                        status = "FAILED"
+                    results[test_name] = status
+
+        return results
+
+    @staticmethod
+    def _check_tests(
+        results: dict[str, str], test_ids: list[str], expect_pass: bool
+    ) -> tuple[bool, dict]:
+        """Check if test IDs match expected status in parsed results.
+
+        Args:
+            results: Parsed {test_id: PASSED|FAILED} from test output
+            test_ids: List of test IDs to check
+            expect_pass: True if tests should pass, False if they should fail
+        """
+        details = {}
+        all_match = True
+
+        for tid in test_ids:
+            # Try exact match first
+            status = results.get(tid)
+
+            # Try matching by function name (for sympy bare names)
+            if status is None:
+                func_name = tid.split("::")[-1] if "::" in tid else tid
+                for k, v in results.items():
+                    # Match bare function name against any key ending with it
+                    k_func = k.split("::")[-1] if "::" in k else k
+                    if k_func == func_name:
+                        status = v
+                        break
+
+            if status is None:
+                details[tid] = "NOT_FOUND"
+                all_match = False
+            elif expect_pass and status != "PASSED":
+                details[tid] = status
+                all_match = False
+            elif not expect_pass and status == "PASSED":
+                details[tid] = "PASSED (expected FAILED)"
+                all_match = False
+            else:
+                details[tid] = status
+
+        return all_match, details
+
+    def _run_tests_with_directives(
+        self, directives: list[str], label: str
+    ) -> tuple[int, str, str]:
+        """Run the test command with given directives."""
+        directive_str = " ".join(directives)
+        cmd = f"{self.test_cmd} {directive_str}"
+        if self.eval_commands:
+            cmd = f"{self.eval_commands} && {cmd}"
+        return self._run_cmd(cmd, label)
 
     def grade(self) -> tuple[float, dict]:
-        """Run grading: copy repo, apply test patch, run F2P + P2P tests.
+        """Run grading: apply test patch in-place, run tests, parse results.
 
         Returns:
             (score, metadata) where score is 1.0 if all pass, 0.0 otherwise
         """
-        # Copy repo to grading workspace
-        logger.info(f"Copying repo to {self.working_dir}")
-        subprocess.run(["cp", "-rT", self.repo_path, self.working_dir], check=True)
-
-        # Apply test patch
-        logger.info(f"Applying test patch: {self.test_patch_path}")
+        logger.info(f"Applying test patch in-place: {self.test_patch_path}")
         with open(self.test_patch_path) as f:
             patch_content = f.read()
 
@@ -116,7 +258,7 @@ class SWEBenchRunner:
 
         result = subprocess.run(
             ["git", "apply", "--verbose"],
-            cwd=self.working_dir,
+            cwd=self.repo_path,
             input=patch_content,
             capture_output=True,
             text=True,
@@ -125,21 +267,69 @@ class SWEBenchRunner:
             logger.error(f"git apply failed: {result.stderr}")
             return 0.0, {"error": "git_apply_failed", "stderr": result.stderr}
 
-        # Run FAIL_TO_PASS tests
-        f2p_success, f2p_meta = self._run_test_suite(self.fail_to_pass, "FAIL_TO_PASS")
+        try:
+            # Determine test directives
+            all_test_ids = self.fail_to_pass + self.pass_to_pass
+            directives = self._get_test_directives(all_test_ids)
 
-        # Run PASS_TO_PASS tests
-        p2p_success, p2p_meta = self._run_test_suite(self.pass_to_pass, "PASS_TO_PASS")
+            if not self._ids_have_paths(directives):
+                # Bare function names (sympy etc.) — use file paths from test_patch
+                test_files = self._extract_test_files(patch_content)
+                logger.info(f"Using test files from patch: {test_files}")
+                directives = test_files
 
-        score = 1.0 if (f2p_success and p2p_success) else 0.0
+            # De-duplicate directives while preserving order
+            seen = set()
+            unique_directives = []
+            for d in directives:
+                if d not in seen:
+                    seen.add(d)
+                    unique_directives.append(d)
+
+            # Run ALL tests once
+            exit_code, stdout, stderr = self._run_tests_with_directives(
+                unique_directives, "ALL_TESTS"
+            )
+
+            if exit_code == -1:
+                # Timeout
+                return 0.0, {"error": "timeout"}
+
+            # Parse per-test results from output
+            test_results = self._parse_test_output(stdout, stderr)
+            logger.info(f"Parsed {len(test_results)} test results")
+
+            # Check F2P: all should PASS (agent fixed the bug)
+            f2p_pass, f2p_details = self._check_tests(
+                test_results, self.fail_to_pass, expect_pass=True
+            )
+
+            # Check P2P: all should still PASS
+            p2p_pass, p2p_details = self._check_tests(
+                test_results, self.pass_to_pass, expect_pass=True
+            )
+
+        finally:
+            logger.info("Reversing test patch")
+            subprocess.run(
+                ["git", "apply", "--reverse"],
+                cwd=self.repo_path,
+                input=patch_content,
+                capture_output=True,
+                text=True,
+            )
+
+        score = 1.0 if (f2p_pass and p2p_pass) else 0.0
         metadata = {
-            "f2p": f2p_meta,
-            "p2p": p2p_meta,
-            "f2p_pass": f2p_success,
-            "p2p_pass": p2p_success,
+            "f2p_pass": f2p_pass,
+            "p2p_pass": p2p_pass,
+            "f2p_details": f2p_details,
+            "p2p_details": p2p_details,
+            "exit_code": exit_code,
+            "parsed_test_count": len(test_results),
         }
 
-        logger.info(f"Grade: {score} (F2P={f2p_success}, P2P={p2p_success})")
+        logger.info(f"Grade: {score} (F2P={f2p_pass}, P2P={p2p_pass})")
         return score, metadata
 
 
@@ -174,9 +364,9 @@ class SWEBenchGrader(Grader):
 
         # Handle validation modes
         if validate_mode == "baseline_fail":
-            # At baseline (no fix), F2P should FAIL. We only check F2P here.
-            # If F2P failed (as expected), that's correct -> score 1.0
-            # P2P should still pass at baseline.
+            # At baseline (no fix), F2P should FAIL and P2P should PASS.
+            # The runner checks F2P with expect_pass=True, so f2p_pass=False at baseline.
+            # We invert: if F2P failed (as expected) and P2P passed, that's correct.
             f2p_failed = not metadata.get("f2p_pass", True)
             p2p_passed = metadata.get("p2p_pass", False)
             score = 1.0 if (f2p_failed and p2p_passed) else 0.0

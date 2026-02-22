@@ -222,23 +222,30 @@ def setup_swebench_task(
         logger.info(f"Pre-install: {cmd}")
         _run(cmd, cwd=project_dir)
 
-    # Install pip packages into conda env
-    if pip_packages:
-        pip_list = " ".join(f'"{p}"' for p in pip_packages)
-        logger.info(f"Installing {len(pip_packages)} pip packages")
-        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
+    # Ensure pytest is available in the conda env (needed for test execution)
+    _run(f"conda run -n {conda_env} pip install pytest", cwd=project_dir)
 
-    # Run install command
+    # Run install command first, then pin packages to correct versions
     logger.info(f"Installing: {install_cmd}")
     _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+
+    # Install pinned pip packages AFTER install (overrides with correct versions)
+    if pip_packages:
+        pip_list = " ".join(f'"{p}"' for p in pip_packages)
+        logger.info(f"Pinning {len(pip_packages)} pip packages")
+        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
 
     # 3. Checkout base_commit
     logger.info(f"Checking out base_commit: {base_commit}")
     _run(["git", "checkout", base_commit], cwd=project_dir)
 
-    # Re-install at base_commit (deps may differ)
+    # Re-install at base_commit, then re-pin packages
     logger.info(f"Re-installing at base_commit")
     _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+    if pip_packages:
+        pip_list = " ".join(f'"{p}"' for p in pip_packages)
+        logger.info(f"Re-pinning {len(pip_packages)} pip packages")
+        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
 
     # 4. Store patches
     task_patches_dir = os.path.join(patches_dir, instance_id)
@@ -269,6 +276,7 @@ def setup_swebench_task(
     # Set env vars for grading
     os.environ["SWE_CONDA_ENV"] = conda_env
     os.environ["SWE_TEST_CMD"] = test_cmd
+    os.environ["SWE_INSTALL_CMD"] = install_cmd
     if eval_commands:
         os.environ["SWE_EVAL_COMMANDS"] = " && ".join(eval_commands)
     else:
