@@ -44,15 +44,15 @@ RUN curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download
 ENV PATH=/opt/conda/bin:$PATH
 
 # Pre-create conda envs for Python 3.6-3.12
-# Some old versions may fail on newer glibc — that's OK (|| true)
+# conda-forge dropped Python 3.6/3.7 — use the defaults (Anaconda) channel for those.
+# Modern versions use conda-forge (already the Miniforge default).
 RUN conda create -n py39 python=3.9 -y \
   && conda create -n py310 python=3.10 -y \
   && conda create -n py311 python=3.11 -y \
   && conda create -n py312 python=3.12 -y \
   && conda create -n py38 python=3.8 -y \
-  && (conda create -n py37 python=3.7 -y || true) \
-  && (conda create -n py36 python=3.6 -y || true) \
-  && (conda create -n py35 python=3.5 -y || true) \
+  && conda create -n py37 python=3.7 -c defaults -y \
+  && conda create -n py36 python=3.6 -c defaults -y \
   && conda clean -afy
 
 # Pre-bake: clone all SWE-bench repos and cache pip packages at build time.

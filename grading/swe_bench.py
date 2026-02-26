@@ -301,6 +301,21 @@ class SWEBenchRunner:
         Returns:
             (score, metadata) where score is 1.0 if all pass, 0.0 otherwise
         """
+        # Verify conda env exists before running tests
+        check = subprocess.run(
+            ["conda", "run", "-n", self.conda_env, "python", "--version"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if check.returncode != 0:
+            logger.error(
+                f"Conda env '{self.conda_env}' is missing or broken: {check.stderr}"
+            )
+            return 0.0, {
+                "error": "conda_env_missing",
+                "conda_env": self.conda_env,
+                "stderr": check.stderr,
+            }
+
         logger.info(f"Applying test patch in-place: {self.test_patch_path}")
         with open(self.test_patch_path) as f:
             patch_content = f.read()
