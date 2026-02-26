@@ -193,63 +193,64 @@ def main():
     copy_pip_wheel_cache()
 
     # ---- Step 5: Pre-build projects that have C extensions ----
-    # Only prebuild repos where `pip install -e .` compiles C/Cython code.
-    # Pure Python repos (django, sympy, flask, etc.) install in seconds and
-    # don't need prebuilds. This cuts build time from ~50min to ~10min.
-    PREBUILD_REPOS = {"astropy/astropy", "matplotlib/matplotlib", "scikit-learn/scikit-learn"}
-    print("\n=== Step 5: Pre-building C-extension projects ===", flush=True)
+    # Skipped by default to save disk space during Docker build (~10+ GB).
+    # The runtime install uses cached wheels from Step 4, so the penalty
+    # is only a few minutes of C compilation at task start.
+    # Set PREBAKE_PREBUILDS=1 to enable (requires ~30 GB free in Docker).
+    if os.environ.get("PREBAKE_PREBUILDS") == "1":
+        PREBUILD_REPOS = {"astropy/astropy", "matplotlib/matplotlib", "scikit-learn/scikit-learn"}
+        print("\n=== Step 5: Pre-building C-extension projects ===", flush=True)
 
-    for repo_full, rspec in sorted(specs.items()):
-        if repo_full not in PREBUILD_REPOS:
-            continue
-        repo_name = repo_full.split("/")[-1]
-        base_repo = f"{REPOS_DIR}/{repo_name}"
-        if not os.path.isdir(base_repo):
-            continue
+        for repo_full, rspec in sorted(specs.items()):
+            if repo_full not in PREBUILD_REPOS:
+                continue
+            repo_name = repo_full.split("/")[-1]
+            base_repo = f"{REPOS_DIR}/{repo_name}"
+            if not os.path.isdir(base_repo):
+                continue
 
-        for ver, vspec in sorted(rspec.get("versions", {}).items()):
-            python_ver = vspec.get("python", "3.9")
-            conda_env = f"py{python_ver.replace('.', '')}"
-            install_cmd = vspec.get("install", "python -m pip install -e .")
-            pre_install = vspec.get("pre_install", [])
+            for ver, vspec in sorted(rspec.get("versions", {}).items()):
+                python_ver = vspec.get("python", "3.9")
+                conda_env = f"py{python_ver.replace('.', '')}"
+                install_cmd = vspec.get("install", "python -m pip install -e .")
+                pre_install = vspec.get("pre_install", [])
 
-            # Sanitize version for directory name
-            ver_safe = ver.replace(".", "_")
-            build_dir = f"{PREBUILD_DIR}/{repo_name}_{ver_safe}"
+                ver_safe = ver.replace(".", "_")
+                build_dir = f"{PREBUILD_DIR}/{repo_name}_{ver_safe}"
 
-            print(f"\n--- Pre-building {repo_full} v{ver} -> {build_dir} ---", flush=True)
+                print(f"\n--- Pre-building {repo_full} v{ver} -> {build_dir} ---", flush=True)
 
-            # Clone from local repo (hardlinks .git objects to save space)
-            run(["git", "clone", "--local", base_repo, build_dir])
-            run(["git", "config", "--global", "--add", "safe.directory", build_dir])
+                result = run(["git", "clone", "--local", base_repo, build_dir])
+                if result.returncode != 0:
+                    print(f"  SKIP: clone failed (possibly out of disk space)", flush=True)
+                    continue
 
-            # Checkout environment_setup_commit if available
-            env_commit = env_commits.get((repo_full, ver), "")
-            if env_commit:
-                print(f"  Checking out env_commit: {env_commit[:12]}", flush=True)
-                run(["git", "checkout", env_commit], cwd=build_dir)
+                run(["git", "config", "--global", "--add", "safe.directory", build_dir])
 
-            # Run non-system pre_install commands (sed patches etc.)
-            for cmd in pre_install:
-                if not is_system_preinstall(cmd):
-                    run(cmd, cwd=build_dir)
+                env_commit = env_commits.get((repo_full, ver), "")
+                if env_commit:
+                    print(f"  Checking out env_commit: {env_commit[:12]}", flush=True)
+                    run(["git", "checkout", env_commit], cwd=build_dir)
 
-            # Add --find-links to install cmd to use cached wheels
-            if "pip install" in install_cmd:
-                install_cmd_cached = install_cmd.replace(
-                    "pip install",
-                    f"pip install --find-links {PIP_CACHE_DIR}",
-                    1,
-                )
-            else:
-                install_cmd_cached = install_cmd
+                for cmd in pre_install:
+                    if not is_system_preinstall(cmd):
+                        run(cmd, cwd=build_dir)
 
-            # Run the project install (compiles C extensions)
-            print(f"  Running: {install_cmd_cached[:120]}", flush=True)
-            run(f"conda run -n {conda_env} {install_cmd_cached}", cwd=build_dir)
+                if "pip install" in install_cmd:
+                    install_cmd_cached = install_cmd.replace(
+                        "pip install",
+                        f"pip install --find-links {PIP_CACHE_DIR}",
+                        1,
+                    )
+                else:
+                    install_cmd_cached = install_cmd
 
-    # Copy any new wheels generated during project installs
-    copy_pip_wheel_cache()
+                print(f"  Running: {install_cmd_cached[:120]}", flush=True)
+                run(f"conda run -n {conda_env} {install_cmd_cached}", cwd=build_dir)
+
+        copy_pip_wheel_cache()
+    else:
+        print("\n=== Step 5: SKIPPED (set PREBAKE_PREBUILDS=1 to enable) ===", flush=True)
 
     # Show final sizes
     print("\n=== Pre-bake complete! ===", flush=True)

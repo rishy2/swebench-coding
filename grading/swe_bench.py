@@ -166,13 +166,22 @@ class SWEBenchRunner:
         stdout = SWEBenchRunner._strip_ansi(stdout)
         stderr = SWEBenchRunner._strip_ansi(stderr)
 
-        # 1. pytest format: PASSED/FAILED lines in summary section
+        # 1. pytest format: two sub-formats
+        #    a) Short summary (-rA):  'PASSED tests/test_foo.py::test_bar'
+        #    b) Verbose/classic:      'tests/test_foo.py::test_bar PASSED'
         for line in stdout.split("\n"):
             line = line.strip()
+            # Format a: status first
             m = re.match(r"^(PASSED|FAILED|ERROR)\s+(.+?)(\s+-\s+.*)?$", line)
             if m:
                 status = "PASSED" if m.group(1) == "PASSED" else "FAILED"
                 results[m.group(2).strip()] = status
+                continue
+            # Format b: status last (verbose/classic output)
+            m = re.match(r"^(\S+::\S+)\s+(PASSED|FAILED|ERROR)(\s+-\s+.*)?$", line)
+            if m:
+                status = "PASSED" if m.group(2) == "PASSED" else "FAILED"
+                results[m.group(1).strip()] = status
 
         # 2. Django format in stderr. Two sub-formats:
         #    a) Single line: 'test_method (module.Class) ... ok/FAIL/ERROR'
