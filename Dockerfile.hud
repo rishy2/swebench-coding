@@ -55,6 +55,14 @@ RUN conda create -n py39 python=3.9 -y \
   && (conda create -n py35 python=3.5 -y || true) \
   && conda clean -afy
 
+# Pre-bake: clone all SWE-bench repos and cache pip packages at build time.
+# This eliminates runtime git clone + pip download that cause ReadTimeout on HUD.
+COPY ./data/repo_specs.json /tmp/data/repo_specs.json
+COPY ./data/swe_bench_lite.json /tmp/data/swe_bench_lite.json
+COPY ./build_scripts/prebake_repos.py /tmp/prebake_repos.py
+RUN python3 /tmp/prebake_repos.py \
+  && rm -rf /tmp/prebake_repos.py /tmp/data /var/lib/apt/lists/*
+
 WORKDIR /
 
 # Create ubuntu user dirs and project mount point
@@ -65,7 +73,6 @@ ENV HOME=/home/ubuntu
 RUN git config --global user.email "agent@example.com" \
   && git config --global user.name "mr agent"
 
-# No repo clone at build time — happens dynamically in setup_task()
 # Create the project directory and patches directory
 USER root
 RUN mkdir -p /home/ubuntu/project /home/root/patches \

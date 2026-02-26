@@ -1,9 +1,2102 @@
 [
   {
     "env": {
-      "name": "coding-template"
+      "name": "swebench-coding"
     },
-    "scenario": "coding:sample-json-bug",
+    "scenario": "coding:astropy__astropy-12907",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-14182",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-14365",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-14995",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-6938",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-7746",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-10914",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-10924",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11001",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11019",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11039",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11049",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11099",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11133",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11179",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11283",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11422",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11564",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11583",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11620",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11630",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11742",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11797",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11815",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11848",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11905",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11910",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11964",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11999",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12113",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12125",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12184",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12284",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12286",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12308",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12453",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12470",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12497",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12589",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12700",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12708",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12747",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12856",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12908",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12915",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-12983",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13028",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13033",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13158",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13220",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13230",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13265",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13315",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13321",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13401",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13447",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13448",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13551",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13590",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13658",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13660",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13710",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13757",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13768",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13925",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13933",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-13964",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14016",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14017",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14155",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14238",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14382",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14411",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14534",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14580",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14608",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14667",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14672",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14730",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14752",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14787",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14855",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14915",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14997",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-14999",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15061",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15202",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15213",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15252",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15320",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15347",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15388",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15400",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15498",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15695",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15738",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15781",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15789",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15790",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15814",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15819",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15851",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15902",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-15996",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16041",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16046",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16139",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16229",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16255",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16379",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16400",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16408",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16527",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16595",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16816",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16820",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16873",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-16910",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-17051",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-17087",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-18869",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-22711",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-22835",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23299",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23314",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23476",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23562",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23563",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23913",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23964",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-23987",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-24149",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-24265",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-24334",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-24970",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-25079",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-25311",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-25332",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-25433",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-25442",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-25498",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-26011",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:matplotlib__matplotlib-26020",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:mwaskom__seaborn-2848",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:mwaskom__seaborn-3010",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:mwaskom__seaborn-3190",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:mwaskom__seaborn-3407",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pallets__flask-4045",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pallets__flask-4992",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pallets__flask-5063",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:psf__requests-1963",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:psf__requests-2148",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:psf__requests-2317",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:psf__requests-2674",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:psf__requests-3362",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:psf__requests-863",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pydata__xarray-3364",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pydata__xarray-4094",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pydata__xarray-4248",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pydata__xarray-4493",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pydata__xarray-5131",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pylint-dev__pylint-5859",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pylint-dev__pylint-6506",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pylint-dev__pylint-7080",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pylint-dev__pylint-7114",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pylint-dev__pylint-7228",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pylint-dev__pylint-7993",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-11143",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-11148",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-5103",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-5221",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-5227",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-5413",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-5495",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-5692",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-6116",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-7168",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-7220",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-7373",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-7432",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-7490",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-8365",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-8906",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:pytest-dev__pytest-9359",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-10297",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-10508",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-10949",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-11040",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-11281",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-12471",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13142",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13241",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13439",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13496",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13497",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13584",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-13779",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-14087",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-14092",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-14894",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-14983",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-15512",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-15535",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-25500",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-25570",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-25638",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:scikit-learn__scikit-learn-25747",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-10325",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-10451",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-11445",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-7686",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-7738",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-7975",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8273",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8282",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8435",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8474",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8506",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8595",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8627",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8713",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8721",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sphinx-doc__sphinx-8801",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-11400",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-11870",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-11897",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-12171",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-12236",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-12419",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-12454",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-12481",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13031",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13043",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13146",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13177",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13437",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13471",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13480",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13647",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13773",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13895",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13915",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-13971",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-14024",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-14308",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-14317",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-14396",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-14774",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-14817",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-15011",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-15308",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-15345",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-15346",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-15609",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-15678",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-16106",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-16281",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-16503",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-16792",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-16988",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-17022",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-17139",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-17630",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-17655",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18057",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18087",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18189",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18199",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18532",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18621",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18698",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-18835",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-19007",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-19254",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-19487",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20049",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20154",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20212",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20322",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20442",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20590",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-20639",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21055",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21171",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21379",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21612",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21614",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21627",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-21847",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-22005",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-22714",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-22840",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-23117",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-23191",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-23262",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-24066",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-24102",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-24152",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-24213",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:sympy__sympy-24909",
     "args": {}
   }
 ]

@@ -1,0 +1,72 @@
+[
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-12907",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-14182",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-14365",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-14995",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-6938",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:astropy__astropy-7746",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-10914",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-10924",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11001",
+    "args": {}
+  },
+  {
+    "env": {
+      "name": "swebench-coding"
+    },
+    "scenario": "coding:django__django-11019",
+    "args": {}
+  }
+]

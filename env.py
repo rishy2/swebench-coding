@@ -137,6 +137,46 @@ async def editor(
 # Scenario Helpers for SWE-bench
 # ============================================================================
 
+# Pre-baked paths (populated at Docker build time by prebake_repos.py)
+PREBAKED_REPOS_DIR = "/opt/repos"
+PIP_CACHE_DIR = "/opt/pip-cache"
+PREBUILD_DIR = "/opt/prebuilt"
+
+
+def _repo_short_name(repo: str) -> str:
+    """Extract short repo name from 'org/repo' format."""
+    return repo.split("/")[-1]
+
+
+def _is_prebaked(repo: str) -> bool:
+    """Check if a repo has been pre-baked into the image."""
+    return os.path.isdir(os.path.join(PREBAKED_REPOS_DIR, _repo_short_name(repo)))
+
+
+def _get_prebuild_dir(repo: str, version: str) -> str | None:
+    """Get the prebuild directory for a (repo, version) combo if it exists."""
+    repo_name = _repo_short_name(repo)
+    ver_safe = version.replace(".", "_")
+    prebuild = os.path.join(PREBUILD_DIR, f"{repo_name}_{ver_safe}")
+    if os.path.isdir(prebuild):
+        return prebuild
+    return None
+
+
+def _pip_cache_args(strict: bool = True) -> str:
+    """Return pip args to use the local wheel cache if available.
+
+    Args:
+        strict: If True, use --no-index (no network fallback).
+                If False, just use --find-links (prefer cache, allow network).
+    """
+    if os.path.isdir(PIP_CACHE_DIR):
+        if strict:
+            return f"--find-links {PIP_CACHE_DIR} --no-index"
+        return f"--find-links {PIP_CACHE_DIR}"
+    return ""
+
+
 def _load_repo_specs() -> dict:
     """Load repo specifications from data/repo_specs.json."""
     specs_path = Path(__file__).parent / "data" / "repo_specs.json"
@@ -159,6 +199,36 @@ def _run(cmd: str | list[str], **kwargs) -> subprocess.CompletedProcess:
     return result
 
 
+def _is_system_preinstall(cmd: str) -> bool:
+    """Check if a pre_install command is a system-level operation (apt-get, wget, qhull)."""
+    return any(kw in cmd for kw in ("apt-get", "wget", "QHULL", "/testbed/build"))
+
+
+def _run_preinstall(pre_install: list[str], prebaked: bool, cwd: str) -> None:
+    """Run pre_install commands, skipping system-level ones if prebaked."""
+    for cmd in pre_install:
+        if prebaked and _is_system_preinstall(cmd):
+            logger.info(f"Skipping pre_install (prebaked): {cmd[:80]}")
+            continue
+        logger.info(f"Pre-install: {cmd}")
+        _run(cmd, cwd=cwd)
+
+
+def _pip_install(conda_env: str, packages: list[str], cwd: str, strict_cache: bool = True) -> None:
+    """Install pip packages using cache if available."""
+    cache = _pip_cache_args(strict=strict_cache)
+    pip_list = " ".join(f'"{p}"' for p in packages)
+    _run(f"conda run -n {conda_env} pip install {cache} {pip_list}", cwd=cwd)
+
+
+def _run_install_cmd(conda_env: str, install_cmd: str, cwd: str) -> None:
+    """Run the project install command, using pip cache for --find-links (non-strict)."""
+    cache = _pip_cache_args(strict=False)
+    if cache and "pip install" in install_cmd:
+        install_cmd = install_cmd.replace("pip install", f"pip install {cache}", 1)
+    _run(f"conda run -n {conda_env} {install_cmd}", cwd=cwd)
+
+
 def setup_swebench_task(
     instance_id: str,
     repo: str,
@@ -173,7 +243,7 @@ def setup_swebench_task(
 ) -> None:
     """Set up environment for a SWE-bench task.
 
-    1. Clone the repo
+    1. Clone the repo (from local cache if prebaked, else from GitHub)
     2. Checkout environment_setup_commit, install deps via conda
     3. Checkout base_commit
     4. Store patches
@@ -200,61 +270,70 @@ def setup_swebench_task(
     # Determine conda env name
     py_major_minor = python_version.replace(".", "")
     conda_env = f"py{py_major_minor}"
+    prebaked = _is_prebaked(repo)
 
     logger.info(f"Setting up SWE-bench task: {instance_id}")
-    logger.info(f"  repo={repo}, version={version}, python={python_version}, conda_env={conda_env}")
+    logger.info(f"  repo={repo}, version={version}, python={python_version}, conda_env={conda_env}, prebaked={prebaked}")
 
-    # 1. Clone the repo
-    logger.info(f"Cloning {repo} to {project_dir}")
+    # 1. Clone the repo (prefer prebuild > local clone > network)
     _run(["rm", "-rf", project_dir])
-    _run(["git", "clone", f"https://github.com/{repo}.git", project_dir])
+    prebuild_dir = _get_prebuild_dir(repo, version)
+    if prebuild_dir:
+        logger.info(f"Copying prebuild from {prebuild_dir} to {project_dir}")
+        _run(["cp", "-a", prebuild_dir, project_dir])
+    elif prebaked:
+        cached_repo = os.path.join(PREBAKED_REPOS_DIR, _repo_short_name(repo))
+        logger.info(f"Local clone from {cached_repo} to {project_dir}")
+        _run(["git", "clone", "--local", cached_repo, project_dir])
+    else:
+        logger.info(f"Network clone {repo} to {project_dir}")
+        _run(["git", "clone", f"https://github.com/{repo}.git", project_dir])
 
     # Mark as safe directory
     _run(["git", "config", "--global", "--add", "safe.directory", project_dir])
 
     # 2. Checkout environment_setup_commit and install deps
-    if environment_setup_commit:
-        logger.info(f"Checking out environment_setup_commit: {environment_setup_commit}")
-        _run(["git", "checkout", environment_setup_commit], cwd=project_dir)
+    # When we have a prebuild, skip the install at env_setup_commit — the prebuild
+    # already ran pre_install + pip_packages + install_cmd at that commit.
+    # This avoids a redundant C extension compilation (~5 min for astropy/sklearn).
+    if prebuild_dir:
+        logger.info("Prebuild available — skipping env_setup_commit install (already done at build time)")
+    else:
+        if environment_setup_commit:
+            logger.info(f"Checking out environment_setup_commit: {environment_setup_commit}")
+            _run(["git", "checkout", environment_setup_commit], cwd=project_dir)
 
-    # Run pre_install commands (as root, since they may need apt)
-    for cmd in pre_install:
-        logger.info(f"Pre-install: {cmd}")
-        _run(cmd, cwd=project_dir)
+        # Run pre_install commands (skip system-level ones if prebaked)
+        _run_preinstall(pre_install, prebaked, project_dir)
 
-    # Ensure pytest is available in the conda env (needed for test execution)
-    _run(f"conda run -n {conda_env} pip install pytest", cwd=project_dir)
+        # Ensure pytest is available in the conda env (needed for test execution)
+        _pip_install(conda_env, ["pytest"], project_dir, strict_cache=False)
 
-    # Install pinned pip packages BEFORE install (provides build deps like numpy
-    # for repos that use --no-build-isolation like scikit-learn)
-    if pip_packages:
-        pip_list = " ".join(f'"{p}"' for p in pip_packages)
-        logger.info(f"Pinning {len(pip_packages)} pip packages")
-        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
+        # Install pinned pip packages BEFORE install (provides build deps like numpy
+        # for repos that use --no-build-isolation like scikit-learn)
+        if pip_packages:
+            logger.info(f"Pinning {len(pip_packages)} pip packages")
+            _pip_install(conda_env, pip_packages, project_dir, strict_cache=False)
 
-    # Run install command, then re-pin packages to correct versions
-    logger.info(f"Installing: {install_cmd}")
-    _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+        # Run install command, then re-pin packages to correct versions
+        logger.info(f"Installing: {install_cmd}")
+        _run_install_cmd(conda_env, install_cmd, project_dir)
 
-    if pip_packages:
-        pip_list = " ".join(f'"{p}"' for p in pip_packages)
-        logger.info(f"Re-pinning {len(pip_packages)} pip packages")
-        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
+        if pip_packages:
+            logger.info(f"Re-pinning {len(pip_packages)} pip packages")
+            _pip_install(conda_env, pip_packages, project_dir, strict_cache=False)
 
     # 3. Checkout base_commit (force to handle dirty files from pre_install)
     logger.info(f"Checking out base_commit: {base_commit}")
     _run(["git", "checkout", "-f", base_commit], cwd=project_dir)
 
-    # Re-install at base_commit, then re-pin packages
-    logger.info(f"Re-installing at base_commit")
-    # Re-run pre_install at base_commit (some commands modify build config)
-    for cmd in pre_install:
-        _run(cmd, cwd=project_dir)
-    _run(f"conda run -n {conda_env} {install_cmd}", cwd=project_dir)
+    # Install at base_commit
+    logger.info(f"Installing at base_commit")
+    _run_preinstall(pre_install, prebaked, project_dir)
+    _run_install_cmd(conda_env, install_cmd, project_dir)
     if pip_packages:
-        pip_list = " ".join(f'"{p}"' for p in pip_packages)
-        logger.info(f"Re-pinning {len(pip_packages)} pip packages")
-        _run(f"conda run -n {conda_env} pip install {pip_list}", cwd=project_dir)
+        logger.info(f"Pinning {len(pip_packages)} pip packages")
+        _pip_install(conda_env, pip_packages, project_dir, strict_cache=False)
 
     # 4. Store patches
     task_patches_dir = os.path.join(patches_dir, instance_id)
